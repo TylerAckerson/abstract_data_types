@@ -1,8 +1,8 @@
 class Link
-  attr_accessor :key, :val, :next
+  attr_accessor :key, :val, :next, :prev
 
-  def initialize(key = nil, val = nil, nxt = nil)
-    @key, @val, @next = key, val, nxt
+  def initialize(key = nil, val = nil, nxt = nil, prev = nil)
+    @key, @val, @next, @prev = key, val, nxt, prev
   end
 
   def to_s
@@ -13,10 +13,13 @@ end
 class LinkedList
   include Enumerable
 
-  attr_accessor :head
+  attr_accessor :head, :tail
 
   def initialize
     @head = Link.new
+    @tail = Link.new
+    @head.next = @tail
+    @tail.prev = @head
   end
 
   def [](i)
@@ -25,94 +28,61 @@ class LinkedList
   end
 
   def first
-    return nil if empty?
-    @head.val
+    empty ? nil : @head.next
   end
 
   def last(test_link = nil)
-    return nil if empty?
-
-    test_link ||= head
-    return test_link if test_link.next.nil?
-
-    last(test_link.next)
+    empty? ? nil : @tail.prev
   end
 
   def empty?
-    @head.nil?
+    @head.next == @tail
   end
 
   def get(key, test_link = nil)
-    return nil if empty?
-
-    test_link ||= head
-
-    return test_link.val if test_link.key == key
-    return nil if test_link.next.nil?
-
-    get(key, test_link.next)
+    each { |link| return link.val if link.key == key }
+    nil
   end
 
   def include?(key)
-    !get(key).nil?
+    any? { |link| link.key == key }
   end
 
   def insert(key, val)
-    last.next = Link.new(key, val)
+    each { |link| return link.val = val if link.key == key }
+
+    new_link = Link.new(key, val)
+
+    @tail.prev.next = new_link
+    new_link.prev = @tail.prev
+    new_link.next = @tail
+    @tail.prev = new_link
+
+    new_link
   end
 
   def remove(key)
-    # return nil if empty? || !include?(key)
-    #
-    # parent = find_parent(key)
-    #   return nil if parent.nil?
-    # child = find_child(key)
-    #
-    #  if child.nil?
-    #    parent.next = nil
-    #  else
-    #    parent.next = child
-    #  end
+    each do |link|
+      if link.key == key
+        link.prev.next = link.next
+        link.next.prev = link.prev
+        link.next, link.prev = nil, nil
+        return link.val
+      end
+    end
+
+    nil
   end
 
-  # def find_parent(key, test_link = nil)
-  #   # find { |link| link.next && link.next.key == key }
-  #   test_link ||= head
-  #   if test_link.next.key == key
-  #     sub_list_tail = test_link
-  #   else
-  #     find_parent(key, test_link.next)
-  #   end
-  # end
-  #
-  # def find_child(key, test_link = nil)
-  #   test_link ||= head
-  #   if test_link.next.key == key
-  #     return test_link.next
-  #   else
-  #     find_parent(key, test_link.next)
-  #   end
-  # end
-
   def each
-    # i = 0
-    # prc ||= { |x| x <=> y }
-    # while (1)
-    #   break if self[i].nil?
-    #   yield(self[i])
-    #   i += 1
-    # end
-    return nil if empty?
-
-    current_link = @head
-    until current_link.nil?
-      yield (current_link)
+    current_link = @head.next
+    until current_link == @tail
+      yield current_link
       current_link = current_link.next
     end
   end
 
-  # uncomment when you have `each` working and `Enumerable` included
-  # def to_s
-  #   inject([]) { |acc, link| acc << "[#{link.key}, #{link.val}]" }.join(", ")
-  # end
+  def to_s
+    inject([]) { |acc, link| acc << "[#{link.key}, #{link.val}]" }.join(", ")
+  end
 end
