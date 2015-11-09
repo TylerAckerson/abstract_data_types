@@ -143,8 +143,11 @@ describe DynamicArray do
   end
 
   describe "#resize!" do
-    it "should call #resize! when too many elements are inserted" do
+    before do
+      allow(arr).to receive(:resize!).and_call_original
+    end
 
+    it "should call #resize! when too many elements are inserted" do
       (1..3).each { |i| arr.push(i) }
       expect(arr.capacity).to eq(3)
 
