@@ -4,31 +4,20 @@ end
 
 class Array
   def hash
-    encrypter = 9
-    result = ""
-    self.each do |item|
-      if item.is_a?(Array)
-        if item.empty?
-          result += "1001"
-        else
-          item.hash
-        end
-      else
-        result += (item.to_s(2).to_i ^ encrypter.to_s(2).to_i).to_s(2)
-      end
+    each_with_index.inject(0) do |intermediate_hash, (el, i)|
+      (el.hash + i.hash) ^ intermediate_hash
     end
-    result.to_i
   end
 end
 
 class String
   def hash
-    self.split('').map(&:to_s).map(&:ord).hash
+    chars.map(&:ord).hash
   end
 end
 
 class Hash
   def hash
-    self.keys.sort.map!(&:to_s).map!(&:ord).hash
+    to_a.sort_by(&:hash).hash
   end
 end
