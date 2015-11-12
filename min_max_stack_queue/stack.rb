@@ -4,15 +4,23 @@ class Stack
   end
 
   def pop
-    @store.pop
+    @store.pop[:value]
   end
 
   def push(value)
-    @store << value
+    if @store.empty?
+      @store << { value: value,
+                    min: value,
+                    max: value}
+    else
+      @store << { value: value,
+                    min: [@store.last[:min], value].min,
+                    max: [@store.last[:max], value].max}
+    end
   end
 
   def peek
-    @store.last
+    @store.last[:value]
   end
 
   def size
