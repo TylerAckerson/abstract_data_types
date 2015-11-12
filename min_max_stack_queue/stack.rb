@@ -1,5 +1,5 @@
 class Stack
-  def def initialize(store = [])
+  def initialize(store = [])
     @store = store
   end
 
